@@ -1,6 +1,8 @@
 
 from worlds._bizhawk.client import BizHawkClient
-from worlds._bizhawk import display_message, read, write, guarded_write
+import worlds._bizhawk as bizhawk
+from worlds.hamhamsunite.items import HAMCHATS
+from worlds.hamhamsunite.locations import CLUBHOUSE_LOCATION_DATAS
 
 
 # https://github.com/HaychDeeHD/HamHamsUniteApWorld/tree/main/worlds/_bizhawk
@@ -15,6 +17,11 @@ class HamHamsUniteClient(BizHawkClient):
         self.checkedDreamingHamsterMegaQ = False
     
     async def validate_rom(self, ctx):
+        # This is where I give the server some args it needs (via ctx)
+        ctx.game = self.game
+        # Indicates I should be sent items from other worlds and from mine
+        ctx.items_handling = 0b011
+
         # TODO In the future, this should determine that the running rom is HHU
         return True
     
@@ -25,40 +32,42 @@ class HamHamsUniteClient(BizHawkClient):
 
     def on_package(self, ctx, cmd, args):
         # Is this more for system messages like deathlinks and DCs?
+        # I think this is not necessary in practice for locs/items if game_watcher is consulting server state
         pass
 
     async def game_watcher(self, ctx):
-        """Runs on a loop with the approximate interval `ctx.watcher_timeout`. The currently loaded ROM is guaranteed
-        to have passed your validator when this function is called, and the emulator is very likely to be connected."""
-        # if not ctx.server or not ctx.server.socket.open or ctx.server.socket.closed:
-        #     return
-        
-        # data = await read(ctx.bizhawk_ctx, [(loc_data[0], loc_data[1], "WRAM")
-        #                                     for loc_data in DATA_LOCATIONS.values()])
-        # data = {data_set_name: data_name for data_set_name, data_name in zip(DATA_LOCATIONS.keys(), data)}
+
+        # Require a server connection
+        if not ctx.server or not ctx.server.socket.open or ctx.server.socket.closed:
+            return
+
+        await self.update_checked_locations(ctx)
+        await self.write_inventory_from_state(ctx)
 
 
-        # if data["GameStatus"][0] == 0 or data["ResetCheck"] == b'\xff\xff\xff\x7f':
-        #     # Do not handle anything before game save is loaded
-        #     self.game_state = False
-        #     return
-        # elif (data["GameStatus"][0] not in (0x2A, 0xAC)
-        #       or data["CrashCheck1"][0] & 0xF0 or data["CrashCheck1"][1] & 0xFF
-        #       or data["CrashCheck2"][0]
-        #       or data["CrashCheck3"][0] > 10
-        #       or data["CrashCheck4"][0] > 3):
-        #     # Should mean game crashed
-        #     logger.warning("Pokémon Red/Blue game may have crashed. Disconnecting from server.")
-        #     self.game_state = False
-        #     await ctx.disconnect()
-        #     return
-        # self.game_state = True
+    async def update_checked_locations(self, ctx):
+        # If there are no checked locations in state, we auto-check Boss's gift Chats as starting checks
+        # TODO in the future there may be flags representing these
+        if len(ctx.checked_locations) == 0:
+            await ctx.check_locations([locationdata.id for locationdata in CLUBHOUSE_LOCATION_DATAS])
 
+        # These addresses are relative to the start of WRAM, 0xC000
 
-        # await display_message(ctx.bizhawk_ctx, 'Obtained MegaQ ' + str(self.checkedDreamingHamsterMegaQ))
-
-        byteC76B = (await read(ctx.bizhawk_ctx, [(0xC76B, 1, "WRAM")]))[0]
+        # TODO generalize this
+        byteC76B = (await bizhawk.read(ctx.bizhawk_ctx, [(0x76B, 1, "WRAM")]))[0]
         if not self.checkedDreamingHamsterMegaQ and byteC76B !=  0x00:
+            # TODO replace with a location send
             self.checkedDreamingHamsterMegaQ = True
             print('\n\nClient Detected Location Flag!!\n\n')
 
+    async def write_inventory_from_state(self, ctx):
+        chatarray = [0xFF] * 2 * 86
+        for collect_order, received in enumerate(ctx.items_received):
+            # TODO Replace traversal with a map
+            # TODO in the future, misses will be expected because not all items will be hamchats
+            hamchatitemdata = next((itemdata for itemdata in HAMCHATS if itemdata.id == received.item)) # TODO may throw ValueError
+            chatarray[hamchatitemdata.index * 2] = collect_order
+        num_chats = len(ctx.items_received) # TODO in the future there will be other items
+        chatarray.append(num_chats)
+
+        await bizhawk.write(ctx.bizhawk_ctx, [(0x9A3, chatarray, "WRAM")])

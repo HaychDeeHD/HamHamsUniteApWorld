@@ -11,34 +11,7 @@ from worlds.AutoWorld import World
 from .client import HamHamsUniteClient # not used, but must be imported
 
 
-# from worlds.LauncherComponents import (
-#     Component,
-#     Type,
-#     components,
-#     icon_paths,
-#     launch_subprocess,
-# )
-
-
-# def run_client() -> None:
-#     """
-#     Launch Ham-Hams Unite client.
-#     """
-#     from .KARClient import main
-
-#     launch_subprocess(main, name="KirbyAirRideClient")
-
-# components.append(
-#     Component(
-#         "Ham Hams Unite Client",
-#         # func=run_client,
-#         component_type=Type.CLIENT,
-#         # icon="Kirby Air Ride",
-#     )
-# )
-# icon_paths["Kirby Air Ride"] = "ap:worlds.kirby_air_ride/assets/allpatch.png"
-
-class MyGameWorld(World):
+class HamHamsUniteWorld(World):
     """Insert description of the world/game here."""
     game = "Ham Hams Unite"
     options_dataclass = HamHamsUniteGameOptions
