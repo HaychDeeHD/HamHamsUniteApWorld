@@ -2,7 +2,7 @@
 from worlds._bizhawk.client import BizHawkClient
 import worlds._bizhawk as bizhawk
 from worlds.hamhamsunite.items import HAMCHATS
-from worlds.hamhamsunite.locations import CLUBHOUSE_LOCATION_DATAS
+from worlds.hamhamsunite.locations import LOCATION_DATA_DICT
 
 
 # https://github.com/HaychDeeHD/HamHamsUniteApWorld/tree/main/worlds/_bizhawk
@@ -12,10 +12,7 @@ class HamHamsUniteClient(BizHawkClient):
     patch_suffix = (".gbc")
     game = "Ham Hams Unite"
 
-    def __init__(self):
-        super().__init__()
-        self.checkedDreamingHamsterMegaQ = False
-    
+
     async def validate_rom(self, ctx):
         # This is where I give the server some args it needs (via ctx)
         ctx.game = self.game
@@ -24,19 +21,9 @@ class HamHamsUniteClient(BizHawkClient):
 
         # TODO In the future, this should determine that the running rom is HHU
         return True
-    
-    async def set_auth(self, ctx):
-        # The client will ask for the player's name unless this function can determine it.
-        # TODO in the future, the name could be patched into the ROM and read from there.
-        pass
 
-    def on_package(self, ctx, cmd, args):
-        # Is this more for system messages like deathlinks and DCs?
-        # I think this is not necessary in practice for locs/items if game_watcher is consulting server state
-        pass
 
     async def game_watcher(self, ctx):
-
         # Require a server connection
         if not ctx.server or not ctx.server.socket.open or ctx.server.socket.closed:
             return
@@ -49,16 +36,32 @@ class HamHamsUniteClient(BizHawkClient):
         # If there are no checked locations in state, we auto-check Boss's gift Chats as starting checks
         # TODO in the future there may be flags representing these
         if len(ctx.checked_locations) == 0:
-            await ctx.check_locations([locationdata.id for locationdata in CLUBHOUSE_LOCATION_DATAS])
+            await ctx.check_locations([location_data.id for location_data in LOCATION_DATA_DICT.values() if location_data.region_name == "Starting"])
+            return
 
-        # These addresses are relative to the start of WRAM, 0xC000
+        # All these addresses are relative to the start of WRAM, 0xC000.
 
-        # TODO generalize this
-        byteC76B = (await bizhawk.read(ctx.bizhawk_ctx, [(0x76B, 1, "WRAM")]))[0]
-        if not self.checkedDreamingHamsterMegaQ and byteC76B !=  0x00:
-            # TODO replace with a location send
-            self.checkedDreamingHamsterMegaQ = True
-            print('\n\nClient Detected Location Flag!!\n\n')
+        # Read bytes C718 - CAB5 (inclusive). 922 state bytes plus 4 ending bytes
+        wram = list((await bizhawk.read(ctx.bizhawk_ctx, [(0x718, 926, "WRAM")]))[0])
+
+        def getByte(address):
+            return wram[address - 0xC718]
+
+        def getBit(address, bit):
+            return bool(getByte(address) & (1 << bit))
+
+        newly_checked_locations = []
+        for location_id in ctx.missing_locations:
+            location_data = LOCATION_DATA_DICT[location_id] # Throws KeyError if not found?
+            print(len(wram))
+            print(wram)
+            print(str(location_data.address) + ' ' + str(location_data.bit))  
+            if location_data.address != None and location_data.bit != None and getBit(location_data.address, location_data.bit):
+                newly_checked_locations.append(location_id)
+
+        if len(newly_checked_locations) > 0:
+            await ctx.check_locations(newly_checked_locations)
+
 
     async def write_inventory_from_state(self, ctx):
         chatarray = [0xFF] * 2 * 86
