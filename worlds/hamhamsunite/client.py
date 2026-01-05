@@ -42,20 +42,17 @@ class HamHamsUniteClient(BizHawkClient):
         # All these addresses are relative to the start of WRAM, 0xC000.
 
         # Read bytes C718 - CAB5 (inclusive). 922 state bytes plus 4 ending bytes
-        wram = list((await bizhawk.read(ctx.bizhawk_ctx, [(0x718, 926, "WRAM")]))[0])
+        player_state = list((await bizhawk.read(ctx.bizhawk_ctx, [(0x718, 926, "WRAM")]))[0])
 
         def getByte(address):
-            return wram[address - 0xC718]
+            return player_state[address - 0xC718]
 
         def getBit(address, bit):
             return bool(getByte(address) & (1 << bit))
 
         newly_checked_locations = []
         for location_id in ctx.missing_locations:
-            location_data = LOCATION_DATA_DICT[location_id] # Throws KeyError if not found?
-            print(len(wram))
-            print(wram)
-            print(str(location_data.address) + ' ' + str(location_data.bit))  
+            location_data = LOCATION_DATA_DICT[location_id] # Throws KeyError if not found? 
             if location_data.address != None and location_data.bit != None and getBit(location_data.address, location_data.bit):
                 newly_checked_locations.append(location_id)
 
