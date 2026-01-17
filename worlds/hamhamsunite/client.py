@@ -60,6 +60,8 @@ class HamHamsUniteClient(BizHawkClient):
             await ctx.check_locations(newly_checked_locations)
 
 
+    # Turns out this is *just* an object for tracking order obtained for the Dictionary screen.
+    # Actual state is just In the C918 Bit Array
     async def write_inventory_from_state(self, ctx):
         chatarray = [0xFF] * 2 * 86
         for collect_order, received in enumerate(ctx.items_received):

@@ -59,7 +59,8 @@ def create_location_datas(location_tuple_list):
 # 6 -- 01000000 -- 0x40
 # 7 -- 10000000 -- 0x80
 
-# A dict mapping location_id to location_data
+# A dict mapping location_id to location_data. All chat flags in C918 region
+# The flags are in order!
 LOCATION_DATA_DICT = create_location_datas([
     ("Starting", "Tutorial HamChat 1 (Hamha)", 0xC919, 3, None),
     ("Starting", "Tutorial HamChat 2 (Tack-Q)", 0xC919, 5, None),
@@ -73,11 +74,11 @@ LOCATION_DATA_DICT = create_location_datas([
     ("Starting", "Tutorial HamChat 9 (Lookie)", 0xC921, 3, None),
     ("Starting", "Tutorial HamChat 10 (No-P)", 0xC922, 2, None),
     ("Starting", "Tutorial HamChat 11 (Yep-P)", 0xC922, 3, None),
-    ("Acorn Shrine", "Dreaming Hamster (Mega-Q)", 0xC76B, 0, ["Hamha"]),
-    ("Acorn Shrine", "Flower Hamster (Koochi-Q)", 0xC91B, 1, ["Hif-hif"]), # TODO this address seems incorrect
+    ("Acorn Shrine", "Dreaming Hamster (Mega-Q)", 0xC91A, 5, ["Hamha"]), # C76B 0 did kinda work though
+    ("Acorn Shrine", "Flower Hamster (Koochi-Q)", 0xC94A, 1, ["Hif-hif"]), # TODO this address seems incorrect
     ("Acorn Shrine", "Rooftop Hamster (Nopibloo)", 0xC91D, 4, ["Hamha", "Tack-Q"]),
     ("Acorn Shrine", "Lovesick Hamster (Teenie)", 0xC91A, 4, ["Hamha", "Tack-Q"]),
-    ("Acorn Shrine", "Maxwell (Bizarroo)", None, None, ["Nopibloo"]),
+    ("Acorn Shrine", "Maxwell (Bizarroo)", 0xC91E, 4, ["Nopibloo"]),
     # Oopsie 0xC91D
     # Sparklie 0xC91C
 ])
