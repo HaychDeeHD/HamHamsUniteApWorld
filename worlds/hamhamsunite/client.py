@@ -1,7 +1,6 @@
 from worlds._bizhawk.client import BizHawkClient
 import worlds._bizhawk as bizhawk
-from worlds.hamhamsunite.items import HAMCHATS
-from worlds.hamhamsunite.locations import LOCATION_DATA_DICT
+# from worlds.hamhamsunite.locations import LOCATION_DATA_DICT
 
 from typing import TYPE_CHECKING, List
 
@@ -9,6 +8,11 @@ if TYPE_CHECKING:
     from worlds._bizhawk.context import BizHawkClientContext
 
 # https://github.com/HaychDeeHD/HamHamsUniteApWorld/tree/main/worlds/_bizhawk
+
+def getBitArrayByteAndBit(bitArrayIndex: int) -> tuple[int, int]:
+    bitArrayByteAddress = 0xC918 + (bitArrayIndex // 8)
+    bitArrayBitNumber = bitArrayIndex % 8
+    return (bitArrayByteAddress, bitArrayBitNumber)
 
 class HamHamsUniteClient(BizHawkClient):
     system = "GBC"
@@ -36,29 +40,25 @@ class HamHamsUniteClient(BizHawkClient):
 
 
     async def update_checked_locations(self, ctx: 'BizHawkClientContext'):
-        # If there are no checked locations in state, we auto-check Boss's gift Chats as starting checks
-        # TODO in the future there may be flags representing these
-        if len(ctx.checked_locations) == 0:
-            await ctx.check_locations([location_data.id for location_data in LOCATION_DATA_DICT.values() if location_data.region_name == "Starting"])
-            return
+        # TODO implement starting_items
 
         # All these addresses are relative to the start of WRAM, 0xC000.
 
         # Read bytes C718 - CAB5 (inclusive). 922 state bytes plus 4 ending bytes
         player_state = list((await bizhawk.read(ctx.bizhawk_ctx, [(0x718, 926, "WRAM")]))[0])
 
-        def getByte(address: int):
-            return player_state[address - 0xC718]
+        def isLocationChecked(location_id: int) -> bool:
+            # TODO In the future there will be non-chat locations. Also remove the magic number.
+            bitArrayIndex = location_id - 5000 + 11 # The first Hamchat is at index 11
+            bitArrayByteAddress, bitArrayBitNumber = getBitArrayByteAndBit(bitArrayIndex)
+            return bool(player_state[bitArrayByteAddress - 0xC718] & (1 << bitArrayBitNumber))
 
-        def getBit(address: int, bit: int):
-            return bool(getByte(address) & (1 << bit))
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # TODO this isn't going to work. We can't read location flags from the same place we write item flags!
+        # I guess we will need to find other flags that indicate you got the chat? Like the giving hamster's state? What we were starting to track before.
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        newly_checked_locations: List[int] = []
-        for location_id in ctx.missing_locations:
-            location_data = LOCATION_DATA_DICT[location_id] # Throws KeyError if not found? 
-            if location_data.address != None and location_data.bit != None and getBit(location_data.address, location_data.bit):
-                newly_checked_locations.append(location_id)
-
+        newly_checked_locations: List[int] = [location_id for location_id in ctx.missing_locations if isLocationChecked(location_id)]
         if len(newly_checked_locations) > 0:
             await ctx.check_locations(newly_checked_locations)
 
@@ -66,15 +66,22 @@ class HamHamsUniteClient(BizHawkClient):
     async def write_hambook_from_state(self, ctx: 'BizHawkClientContext'):
         chatarray = [0xFF] * 2 * 86
         for collect_order, received in enumerate(ctx.items_received):
-            # TODO Replace traversal with a map
-            # TODO in the future, misses will be expected because not all items will be hamchats
-            hamchatitemdata = next((itemdata for itemdata in HAMCHATS if itemdata.id == received.item)) # TODO may throw ValueError
-            chatarray[hamchatitemdata.index * 2] = collect_order
+            # TODO In the future there will be non-chat locations. Also remove the magic number.
+            chatarray[(received.item - 1000) * 2] = collect_order
         num_chats = len(ctx.items_received) # TODO in the future there will be other items
         chatarray.append(num_chats)
 
         await bizhawk.write(ctx.bizhawk_ctx, [(0x9A3, chatarray, "WRAM")])
 
     async def write_bitarray_obtained_hamchat_flags_from_state(self, ctx: 'BizHawkClientContext'):
-        # chats_bitarray = [0x00] * 12
-        pass
+        # TODO don't overwrite the non-Chat flags on the ends with 0's
+        chats_bitarray = [0x00] * 13
+        for item in ctx.items_received:
+            # TODO In the future there will be non-chat locations. Also remove the magic number.
+            bitArrayIndex = item.item - 1000 + 11 # The first Hamchat is at index 11
+            bitArrayByteAddress, bitArrayBitNumber = getBitArrayByteAndBit(bitArrayIndex)
+            chats_bitarray_index = bitArrayByteAddress - 0xC918
+            # Flip bit from 0 to 1
+            chats_bitarray[chats_bitarray_index] = chats_bitarray[chats_bitarray_index] | (1 << bitArrayBitNumber)
+
+        await bizhawk.write(ctx.bizhawk_ctx, [(0x918, chats_bitarray, "WRAM")])

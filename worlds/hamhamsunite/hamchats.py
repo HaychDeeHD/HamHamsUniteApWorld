@@ -1,0 +1,106 @@
+from typing import List
+
+class HamChatData():
+    index: int
+    name: str
+    vanilla_region_name: str
+    vanilla_location_name: str
+    # TODO Change to always be a list, but possibly empty
+    requirements: List[str] | None
+
+    def __init__(self, index: int, name: str, vanilla_region_name: str, vanilla_location_name: str, requirements: List[str] | None):
+        self.index = index
+        self.name = name
+        self.vanilla_region_name = vanilla_region_name
+        self.vanilla_location_name = vanilla_location_name + f' ({name})'
+        self.requirements = requirements
+
+# List of all HamChats in the same order the game stores them and their vanilla data.
+HAMCHATS = [
+    HamChatData(0, 'Hamha', 'Starting', '"Tutorial HamChat', None),
+    HamChatData(1, 'Hif-hif', 'Starting', '"Tutorial HamChat', None),
+    HamChatData(2, 'Tack-Q', 'Starting', '"Tutorial HamChat', None),
+    HamChatData(3, 'Digdig', 'Starting', '"Tutorial HamChat', None),
+    HamChatData(4, 'Nogo', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(5, 'Wondachu', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(6, 'Koochi-Q', 'Acorn Shrine', 'Flower Hamster', ["Hif-hif"]),
+    HamChatData(7, 'Grab-b', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(8, 'Hamsolo', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(9, 'Teenie', 'Acorn Shrine', 'Lovesick Hamster', ["Hamha", "Tack-Q"]),
+    HamChatData(10, 'Mega-Q', 'Acorn Shrine', 'Dreaming Hamster', ['Hamha']),
+    HamChatData(11, 'Twintoo', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(12, 'Ouchichi', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(13, 'Spiffie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(14, 'Blissie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(15, 'Hamspar', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(16, 'Smoochie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(17, 'Stickie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(18, 'Shockie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(19, 'Frost-T', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(20, 'Noworrie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(21, 'Blash-T', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(22, 'Krmpkrmp', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(23, 'Scoochie', 'Starting', '"Tutorial HamChat', None),
+    HamChatData(24, 'Delichu', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(25, 'Wishie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(26, 'Blahh', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(27, 'Sparklie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(28, 'Minglie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(29, 'Thank-Q', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(30, 'Oopsie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(31, 'Whawha', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(32, 'Dingbang', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(33, 'Nopibloo', 'Acorn Shrine', 'Rooftop Hamster', ["Hamha", "Tack-Q"]),
+    HamChatData(34, 'Gasp-p', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(35, 'Nokrmp-P', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(36, 'Hammo', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(37, 'Hushie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(38, 'Zuzuzu', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(39, 'Hushgo', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(40, 'Meep-P', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(41, 'Bizzaroo', 'Acorn Shrine', 'Maxwell', ["Nopibloo"]),
+    HamChatData(42, 'Wait-Q', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(43, 'Blanko', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(44, 'Lotsa', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(45, 'Ta-dah', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(46, 'Shashaa', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(47, 'Pookie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(48, 'Herk-Q', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(49, 'Panic-Q', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(50, 'Nopookie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(51, 'Hulahula', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(52, 'Soak-Q', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(53, 'Grit-T', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(54, 'Hamchu', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(55, 'Goodgo', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(56, 'Scrit-T', 'Starting', '"Tutorial HamChat', None),
+    HamChatData(57, 'Pakapaka', 'Starting', '"Tutorial HamChat', None),
+    HamChatData(58, 'Go-P', 'Starting', '"Tutorial HamChat', None),
+    HamChatData(59, 'Bestest', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(60, 'Hotchu', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(61, 'Cramcram', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(62, 'Clapclap', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(63, 'Chukchuk', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(64, 'Lookie', 'Starting', '"Tutorial HamChat', None),
+    HamChatData(65, 'Huffpuff', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(66, 'Perksie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(67, 'Greatchu', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(68, 'Pooie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(69, 'Tuggie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(70, 'Tootru', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(71, 'No-P', 'Starting', '"Tutorial HamChat', None),
+    HamChatData(72, 'Yep-P', 'Starting', '"Tutorial HamChat', None),
+    HamChatData(73, 'Wit-T', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(74, 'Blushie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(75, 'Bye-Q', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(76, 'Hamtast', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(77, 'Dundeal', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(78, 'Giftee', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(79, 'See-tru', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(80, 'Bluhoo', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(81, 'Smidgie', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(82, 'Givehoo', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(83, 'Hampact', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(84, 'Gorush', 'TBDRegion', 'TBDLocation', None),
+    HamChatData(85, 'Hamteam', 'TBDRegion', 'TBDLocation', None),
+]
