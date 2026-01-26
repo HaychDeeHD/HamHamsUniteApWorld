@@ -1,16 +1,12 @@
-from BaseClasses import Location
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-  from BaseClasses import Region
-  from typing import List, Optional, Tuple
+from BaseClasses import Location, Region
+from typing import List, Optional, Tuple
 
 # This class represents a location in the multiworld. It will be constructed at generation time.
 # This location class only makes sense in a context where there is a defined player and multiworld.
 class HamHamsUniteLocation(Location):
     game = "Ham Hams Unite"
 
-    def __init__(self, location_data: HamHamsUniteLocationData, player: int, region: Region):
+    def __init__(self, location_data: 'HamHamsUniteLocationData', player: int, region: Region):
         super().__init__(player, location_data.name, location_data.id, region)
         self.location_data = location_data
 

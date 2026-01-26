@@ -5,7 +5,7 @@ from BaseClasses import Item, ItemClassification
 class HamHamsUniteItem(Item):
     game = "Ham Hams Unite"
 
-    def __init__(self, item_data: HamHamsUniteItemData, player: int):
+    def __init__(self, item_data: 'HamHamsUniteItemData', player: int):
         super().__init__(item_data.name, item_data.classification, item_data.id, player)
         self.item_data = item_data
 

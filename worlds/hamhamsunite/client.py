@@ -1,14 +1,12 @@
-
 from worlds._bizhawk.client import BizHawkClient
 import worlds._bizhawk as bizhawk
 from worlds.hamhamsunite.items import HAMCHATS
 from worlds.hamhamsunite.locations import LOCATION_DATA_DICT
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from worlds._bizhawk.context import BizHawkClientContext
-    from typing import List
 
 # https://github.com/HaychDeeHD/HamHamsUniteApWorld/tree/main/worlds/_bizhawk
 
@@ -18,7 +16,7 @@ class HamHamsUniteClient(BizHawkClient):
     game = "Ham Hams Unite"
 
 
-    async def validate_rom(self, ctx: BizHawkClientContext):
+    async def validate_rom(self, ctx: 'BizHawkClientContext'):
         # This is where I give the server some args it needs (via ctx)
         ctx.game = self.game
         # Indicates I should be sent items from other worlds and from mine
@@ -28,7 +26,7 @@ class HamHamsUniteClient(BizHawkClient):
         return True
 
 
-    async def game_watcher(self, ctx: BizHawkClientContext):
+    async def game_watcher(self, ctx: 'BizHawkClientContext'):
         # Require a server connection
         if not ctx.server or not ctx.server.socket.open or ctx.server.socket.closed: # pyright: ignore[reportUnknownMemberType]
             return
@@ -37,7 +35,7 @@ class HamHamsUniteClient(BizHawkClient):
         await self.write_hambook_from_state(ctx)
 
 
-    async def update_checked_locations(self, ctx: BizHawkClientContext):
+    async def update_checked_locations(self, ctx: 'BizHawkClientContext'):
         # If there are no checked locations in state, we auto-check Boss's gift Chats as starting checks
         # TODO in the future there may be flags representing these
         if len(ctx.checked_locations) == 0:
@@ -65,7 +63,7 @@ class HamHamsUniteClient(BizHawkClient):
             await ctx.check_locations(newly_checked_locations)
 
 
-    async def write_hambook_from_state(self, ctx: BizHawkClientContext):
+    async def write_hambook_from_state(self, ctx: 'BizHawkClientContext'):
         chatarray = [0xFF] * 2 * 86
         for collect_order, received in enumerate(ctx.items_received):
             # TODO Replace traversal with a map
@@ -77,6 +75,6 @@ class HamHamsUniteClient(BizHawkClient):
 
         await bizhawk.write(ctx.bizhawk_ctx, [(0x9A3, chatarray, "WRAM")])
 
-    async def write_bitarray_obtained_hamchat_flags_from_state(self, ctx: BizHawkClientContext):
+    async def write_bitarray_obtained_hamchat_flags_from_state(self, ctx: 'BizHawkClientContext'):
         # chats_bitarray = [0x00] * 12
         pass
