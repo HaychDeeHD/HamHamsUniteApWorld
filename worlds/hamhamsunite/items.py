@@ -5,7 +5,7 @@ from BaseClasses import Item, ItemClassification
 class HamHamsUniteItem(Item):
     game = "Ham Hams Unite"
 
-    def __init__(self, item_data, player):
+    def __init__(self, item_data: HamHamsUniteItemData, player: int):
         super().__init__(item_data.name, item_data.classification, item_data.id, player)
         self.item_data = item_data
 
@@ -15,11 +15,11 @@ class HamHamsUniteItem(Item):
 # It will only be used by this AP World's own code.
 class HamHamsUniteItemData():
     name: str
-    id: str
+    id: int
     classification: ItemClassification
     type: str # TODO enum?
 
-    def __init__(self, name, id, classification, type):
+    def __init__(self, name: str, id: int, classification: ItemClassification, type: str):
         self.name = name
         self.id = id
         self.classification = classification
@@ -28,7 +28,7 @@ class HamHamsUniteItemData():
 class HamChatItemData(HamHamsUniteItemData):
     index: int
 
-    def __init__(self, name, classification, index):
+    def __init__(self, name: str, classification: ItemClassification, index: int):
         BASE_HAMCHAT_ID = 1000 # Arbitrary starting id. Avoids id 0.
         super().__init__(name, BASE_HAMCHAT_ID + index, classification, "HamChat")
         self.index = index

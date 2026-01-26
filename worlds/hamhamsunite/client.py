@@ -4,6 +4,11 @@ import worlds._bizhawk as bizhawk
 from worlds.hamhamsunite.items import HAMCHATS
 from worlds.hamhamsunite.locations import LOCATION_DATA_DICT
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from worlds._bizhawk.context import BizHawkClientContext
+    from typing import List
 
 # https://github.com/HaychDeeHD/HamHamsUniteApWorld/tree/main/worlds/_bizhawk
 
@@ -13,7 +18,7 @@ class HamHamsUniteClient(BizHawkClient):
     game = "Ham Hams Unite"
 
 
-    async def validate_rom(self, ctx):
+    async def validate_rom(self, ctx: BizHawkClientContext):
         # This is where I give the server some args it needs (via ctx)
         ctx.game = self.game
         # Indicates I should be sent items from other worlds and from mine
@@ -23,16 +28,16 @@ class HamHamsUniteClient(BizHawkClient):
         return True
 
 
-    async def game_watcher(self, ctx):
+    async def game_watcher(self, ctx: BizHawkClientContext):
         # Require a server connection
-        if not ctx.server or not ctx.server.socket.open or ctx.server.socket.closed:
+        if not ctx.server or not ctx.server.socket.open or ctx.server.socket.closed: # pyright: ignore[reportUnknownMemberType]
             return
 
         await self.update_checked_locations(ctx)
-        await self.write_inventory_from_state(ctx)
+        await self.write_hambook_from_state(ctx)
 
 
-    async def update_checked_locations(self, ctx):
+    async def update_checked_locations(self, ctx: BizHawkClientContext):
         # If there are no checked locations in state, we auto-check Boss's gift Chats as starting checks
         # TODO in the future there may be flags representing these
         if len(ctx.checked_locations) == 0:
@@ -44,13 +49,13 @@ class HamHamsUniteClient(BizHawkClient):
         # Read bytes C718 - CAB5 (inclusive). 922 state bytes plus 4 ending bytes
         player_state = list((await bizhawk.read(ctx.bizhawk_ctx, [(0x718, 926, "WRAM")]))[0])
 
-        def getByte(address):
+        def getByte(address: int):
             return player_state[address - 0xC718]
 
-        def getBit(address, bit):
+        def getBit(address: int, bit: int):
             return bool(getByte(address) & (1 << bit))
 
-        newly_checked_locations = []
+        newly_checked_locations: List[int] = []
         for location_id in ctx.missing_locations:
             location_data = LOCATION_DATA_DICT[location_id] # Throws KeyError if not found? 
             if location_data.address != None and location_data.bit != None and getBit(location_data.address, location_data.bit):
@@ -60,9 +65,7 @@ class HamHamsUniteClient(BizHawkClient):
             await ctx.check_locations(newly_checked_locations)
 
 
-    # Turns out this is *just* an object for tracking order obtained for the Dictionary screen.
-    # Actual state is just In the C918 Bit Array
-    async def write_inventory_from_state(self, ctx):
+    async def write_hambook_from_state(self, ctx: BizHawkClientContext):
         chatarray = [0xFF] * 2 * 86
         for collect_order, received in enumerate(ctx.items_received):
             # TODO Replace traversal with a map
@@ -73,3 +76,7 @@ class HamHamsUniteClient(BizHawkClient):
         chatarray.append(num_chats)
 
         await bizhawk.write(ctx.bizhawk_ctx, [(0x9A3, chatarray, "WRAM")])
+
+    async def write_bitarray_obtained_hamchat_flags_from_state(self, ctx: BizHawkClientContext):
+        # chats_bitarray = [0x00] * 12
+        pass

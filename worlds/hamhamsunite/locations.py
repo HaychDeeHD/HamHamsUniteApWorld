@@ -1,12 +1,16 @@
-from typing import List, Optional
 from BaseClasses import Location
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+  from BaseClasses import Region
+  from typing import List, Optional, Tuple
 
 # This class represents a location in the multiworld. It will be constructed at generation time.
 # This location class only makes sense in a context where there is a defined player and multiworld.
 class HamHamsUniteLocation(Location):
     game = "Ham Hams Unite"
 
-    def __init__(self, location_data, player, region):
+    def __init__(self, location_data: HamHamsUniteLocationData, player: int, region: Region):
         super().__init__(player, location_data.name, location_data.id, region)
         self.location_data = location_data
 
@@ -16,7 +20,7 @@ class HamHamsUniteLocation(Location):
 # Instances will be constructed statically in this file. 
 # It will only be used by this AP World's own code.
 class HamHamsUniteLocationData():
-    id: str
+    id: int
     region_name: str
     name: str
     address: Optional[int]
@@ -25,7 +29,7 @@ class HamHamsUniteLocationData():
     # classification: ItemClassification
     # type: str # TODO enum?
 
-    def __init__(self, id, region_name, name, address, bit, required_items):
+    def __init__(self, id: int, region_name: str, name: str, address: int, bit: int, required_items: List[str] | None):
         self.id = id
         self.region_name = region_name
         self.name = name
@@ -34,7 +38,7 @@ class HamHamsUniteLocationData():
         self.required_items = required_items or []
 
 
-def create_location_datas(location_tuple_list):
+def create_location_datas(location_tuple_list: List[Tuple[str, str, int, int, List[str] | None]]):
      BASE_LOC_ID = 1000 # Arbitrary starting id for locations. Helps avoid id 0.
      return {BASE_LOC_ID + id: HamHamsUniteLocationData(BASE_LOC_ID + id, *tuple) for id, tuple in enumerate(location_tuple_list)}
 
